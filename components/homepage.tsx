@@ -1,7 +1,7 @@
 "use client"
 
 import {FormEvent, useState} from "react";
-
+import { Info } from 'lucide-react';
 
 export default function HomePage() {
     const [nameList, setNameList] = useState<string[]>([])
@@ -106,6 +106,7 @@ export default function HomePage() {
                     </div>
                 </div>
             )}
+            <div className="fixed bottom-0 right-0 p-5"><Info className="w-10 h-10 cursor-pointer"/></div>
         </div>
     )
 }
