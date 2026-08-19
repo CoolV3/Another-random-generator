@@ -153,7 +153,7 @@ export default function HomePage() {
 
             {showCheatDrawer && (
                 <div onClick={() => setShowCheatDrawer(false)} className="fixed inset-0 rounded-2xl flex backdrop-blur-2xl w-full h-screen items-center justify-center">
-                    <div className="rounded-2xl flex flex-col p-5 bg-gray-500 min-w-70 min-h-100 max-w-200" onClick={(e) => e.stopPropagation()}>
+                    <div className="rounded-2xl  flex flex-col p-5 bg-gray-500 min-w-70 min-h-100 max-w-100" onClick={(e) => e.stopPropagation()}>
                         <div className="flex flex-col items-center gap-2">
                             <h1 className="text-6xl font-bold bg-clip-text text-transparent bg-linear-to-br from-blue-400 to-violet-800 hover:to-red-400 transition-colors duration-700 text-center">Cheat</h1>
                             <p>How it works</p>
