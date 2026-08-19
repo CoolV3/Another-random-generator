@@ -1,7 +1,7 @@
 "use client"
 
-import {FormEvent, useState} from "react";
-import { Info } from 'lucide-react';
+import {FormEvent, useRef, useState} from "react";
+import {useSearchParams, useRouter} from "next/navigation";
 
 export default function HomePage() {
     const [nameList, setNameList] = useState<string[]>([])
@@ -13,6 +13,13 @@ export default function HomePage() {
     const [mixedNames, setMixedNames] = useState<string[]>([])
 
     const [showSuccessDrawer, setShowSuccessDrawer] = useState(false)
+
+    const searchParams = useSearchParams()
+    const cheatEnabled = searchParams.get("sus") == "true"
+
+    const [showCheatDrawer, setShowCheatDrawer] = useState(cheatEnabled)
+    const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const router = useRouter()
 
     const addName = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -26,15 +33,50 @@ export default function HomePage() {
         setNameInput("")
     }
 
+
     const delteName = (indexdelte: number) => {
-        setNameList((currentNames) => currentNames.filter((_, index) => index !== indexdelte))
+        if (clickTimer.current) {
+            clearTimeout(clickTimer.current);
+        }
+
+        clickTimer.current = setTimeout(() => {
+            setNameList((currentNames) => currentNames.filter((_, index) => index !== indexdelte))
+            clickTimer.current = null
+        }, 300)
+
+
+
+    }
+
+    const setCheatRandom = (index: number) => {
+        if (clickTimer.current) {
+            clearTimeout(clickTimer.current)
+            clickTimer.current = null
+        }
+
+        if (!cheatEnabled) {
+            return
+        }
+
+        const clickedName = nameList[index]
+
+        setMixedNames((currentNames) => [
+            clickedName, ...currentNames.filter((name) => name != clickedName)
+        ])
+
+
     }
 
     const selectRandom = () => {
-        const mixedNames = [...nameList].sort(() => Math.random() -0.5).slice(0, randomValue)
-        setMixedNames(mixedNames)
-        setShowDialog(false)
-        setShowSuccessDrawer(true)
+        if (cheatEnabled) {
+            setShowDialog(false)
+            setShowSuccessDrawer(true)
+        } else {
+            const mixedNames = [...nameList].sort(() => Math.random() -0.5).slice(0, randomValue)
+            setMixedNames(mixedNames)
+            setShowDialog(false)
+            setShowSuccessDrawer(true)
+        }
     }
 
 
@@ -61,7 +103,7 @@ export default function HomePage() {
                     <div>
                         { nameList.map((currentName, index) => (
                         <div key={index}>
-                            <button onClick={() => delteName(index)} className="text-lg font-bold bg-clip-text text-transparent bg-linear-to-br from-blue-400 to-violet-800 hover:to-red-900 hover:from-red-500 transition-colors duration-300 cursor-pointer" key={index}>{currentName}</button>
+                            <button onClick={() => delteName(index)} onDoubleClick={() => setCheatRandom(index)} className="text-lg font-bold bg-clip-text text-transparent bg-linear-to-br from-blue-400 to-violet-800 hover:to-red-900 hover:from-red-500 transition-colors duration-300 cursor-pointer" key={index}>{currentName}</button>
                         </div>
                         ))}
                         <button className="cursor-pointer" onClick={() => setShowList(false)}>Hide list</button>
@@ -92,7 +134,9 @@ export default function HomePage() {
             )}
 
             {showSuccessDrawer && (
-                <div onClick={() => setShowSuccessDrawer(false)} className="fixed inset-0 rounded-2xl flex backdrop-blur-2xl w-full h-screen items-center justify-center">
+                <div onClick={() => {
+                    setShowSuccessDrawer(false)
+                    router.push("/") }} className="fixed inset-0 rounded-2xl flex backdrop-blur-2xl w-full h-screen items-center justify-center">
                     <div className="rounded-2xl flex flex-col p-5 bg-gray-500 min-w-70 min-h-100 max-w-200" onClick={(e) => e.stopPropagation()}>
                         <div className="flex flex-col">
                             <h1 className="text-6xl font-bold bg-clip-text text-transparent bg-linear-to-br from-blue-400 to-violet-800 hover:to-red-400 transition-colors duration-700 text-center">Success</h1>
@@ -106,7 +150,20 @@ export default function HomePage() {
                     </div>
                 </div>
             )}
-            <div className="fixed bottom-0 right-0 p-5"><Info className="w-10 h-10 cursor-pointer"/></div>
+
+            {showCheatDrawer && (
+                <div onClick={() => setShowCheatDrawer(false)} className="fixed inset-0 rounded-2xl flex backdrop-blur-2xl w-full h-screen items-center justify-center">
+                    <div className="rounded-2xl flex flex-col p-5 bg-gray-500 min-w-70 min-h-100 max-w-200" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex flex-col items-center gap-2">
+                            <h1 className="text-6xl font-bold bg-clip-text text-transparent bg-linear-to-br from-blue-400 to-violet-800 hover:to-red-400 transition-colors duration-700 text-center">Cheat</h1>
+                            <p>How it works</p>
+                            <p className="pt-10 text-center text-lg">Just enter the names like normal. Then double click the names that should be selected. This only works if you clicked cheatmode in the info before. Be carefully: if you only click once, the name gets deleted. </p>
+                            <button onClick={() => setShowCheatDrawer(false)} className="aria-disabled:cursor-not-allowed mt-auto aria-disabled:grayscale-100 rounded-2xl px-8 py-5 text-3xl cursor-pointer transition-colors bg-linear-to-br from-blue-400 to-violet-600 hover:to-violet-400 duration-500">Got it!</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     )
 }
