@@ -12,6 +12,8 @@ export default function HomePage() {
     const [randomValue, setRandomValue] = useState<number>()
     const [mixedNames, setMixedNames] = useState<string[]>([])
 
+    const [showSuccessDrawer, setShowSuccessDrawer] = useState(false)
+
     const addName = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
 
@@ -31,6 +33,8 @@ export default function HomePage() {
     const selectRandom = () => {
         const mixedNames = [...nameList].sort(() => Math.random() -0.5).slice(0, randomValue)
         setMixedNames(mixedNames)
+        setShowDialog(false)
+        setShowSuccessDrawer(true)
     }
 
 
@@ -87,6 +91,21 @@ export default function HomePage() {
                 </div>
             )}
 
+            {showSuccessDrawer && (
+                <div onClick={() => setShowSuccessDrawer(false)} className="fixed inset-0 rounded-2xl flex backdrop-blur-2xl w-full h-screen items-center justify-center">
+                    <div className="rounded-2xl flex flex-col p-5 bg-gray-500 min-w-70 min-h-100 max-w-200" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex flex-col">
+                            <h1 className="text-6xl font-bold bg-clip-text text-transparent bg-linear-to-br from-blue-400 to-violet-800 hover:to-red-400 transition-colors duration-700 text-center">Success</h1>
+                            <p>Here are your randomly chosen Names</p>
+                            {mixedNames.map((name, index) => (
+                                <div key={index} className="flex flex-col ">
+                                    <p className="text-4xl text-center font-bold bg-clip-text text-transparent bg-linear-to-br from-blue-400 to-violet-800">{name}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
